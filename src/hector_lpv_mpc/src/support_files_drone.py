@@ -46,8 +46,9 @@ class SupportFilesDrone:
 
         # Initial parameters for trajectory functions:
 
-        r=2    #radius of the spiral flightpath (x-y plane)
-        f=0.025  #rotations in the spiral 
+        r=2    #radius of the spiral  
+        f=0.025 #rotations in spiral
+     
         height_i=5
         height_f=25
         
@@ -75,7 +76,7 @@ class SupportFilesDrone:
         rho= 1.225 # [kg/m^3]
         
         # Choose your trajectory: from 1-9
-        trajectory=1 
+        trajectory=1
 
         no_plots=0    #0-you will see the plots; 1-you will skip the plots (only animation)
 

@@ -224,29 +224,31 @@ for i_global in range(0,plotl-1):
         # Compute the new total omega
         omega_total= omega1-omega2+omega3-omega4
         # Compute new states in the open loop system (interval: Ts/10)
-        states,states_ani,U_ani=support.open_loop_new_states(states,omega_total,U1,U2,U3,U4)
+        states,states_ani,U_ani= support.open_loop_new_states(states,omega_total,U1,U2,U3,U4)
 
-        # print(states)
-        # print(statesTotal)
+        #print("states=",states)
         statesTotal= np.concatenate((statesTotal,[states]),axis=0)
         statesTotal_ani= np.concatenate((statesTotal_ani,states_ani),axis=0)
         UTotal_ani= np.concatenate((UTotal_ani,U_ani),axis=0)
-        print(UTotal_ani)
+        #print("UTotal_ani= ",UTotal_ani)
+        #print("statesTotal_ani:",statesTotal_ani)
 
-################################ Drone velocities input Loop ###############################
+################################ Drone velocities inputs ###############################
 
-statesTotal_x= statesTotal_ani[:,0]
-statesTotal_y= statesTotal_ani[:,1]
+#statesTotal_x
+statesTotal_ani[:,0]
+#statesTotal_y 
+statesTotal_ani[:,1]
+#statesTotal_z 
+statesTotal_ani[:,2]
 
-statesTotal_phi= statesTotal_ani[:,3]
-statesTotal_theta= statesTotal_ani[:,4]
-statesTotal_psi= statesTotal_ani[:,5]
+#statesTotal_phi 
+statesTotal_ani[:,3]
+#statesTotal_theta 
+statesTotal_ani[:,4]
+#statesTotal_psi 
+statesTotal_ani[:,5]				
 
-
-UTotal_U1= UTotal_ani[:,0]
-UTotal_U2= UTotal_ani[:,1]
-UTotal_U3= UTotal_ani[:,2]
-UTotal_U4= UTotal_ani[:,3]
 
 ################################### END OF MPV-LPV CONTROLLER CODE CODE  #######################################################################################################
  
@@ -262,7 +264,7 @@ def takeoff_command():
 
     cmd.linear.x =0
     cmd.linear.y =0
-    cmd.linear.z =40 # motion in vertical z-axis
+    cmd.linear.z =30 # motion in vertical z-axis
 
     cmd.angular.x =0
     cmd.angular.y =0
@@ -280,20 +282,19 @@ def open_loop(statesTotal):
     i=0;
     n=0
          
-
     while not rospy.is_shutdown():
 
         if n<20:
 		quad_vel.publish(takeoff_command())
 		n=n+1
         else:
-		cmd.linear.x =  UTotal_ani[i,0]
-		cmd.linear.y =  UTotal_ani[i,1]
-		#cmd.linear.z =  UTotal_ani[i,2]	       
-
-		cmd.angular.x =  statesTotal_ani[i,3]
-		cmd.angular.y =  statesTotal_ani[i,4] 
-		cmd.angular.z =  statesTotal_ani[i,5]
+		cmd.linear.x = statesTotal_ani[i,0]
+		cmd.linear.y = statesTotal_ani[i,1]   
+		cmd.linear.z = statesTotal_ani[i,2] 
+             	                 
+		cmd.angular.x = statesTotal_ani[i,3]
+		cmd.angular.y = statesTotal_ani[i,4] 
+		cmd.angular.z = statesTotal_ani[i,5]
 
 		i=i+1;
 		quad_vel.publish(cmd)
