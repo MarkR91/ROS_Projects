@@ -7,5 +7,16 @@ Robot Operating System Projects:
 
 Hector drone spiral climb using LPV MPC controller code:
 
-https://user-images.githubusercontent.com/84676012/197454209-47875b20-938f-4413-9b0e-c8f5ed958091.mp4
+
+
+
+https://user-images.githubusercontent.com/84676012/197547317-4fceaa70-c3ad-47a8-8810-c415d04dcf3d.mp4
+
+
+
+
+
+
+
+
 
