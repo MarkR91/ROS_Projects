@@ -7,30 +7,45 @@ class SupportFilesDrone:
     def __init__(self):
         ''' Load the constants that do not change'''
      
-        # Hector Drone aerodynamic model set to off
-        # Original constants based on Asctec Hummingbird drone
-        Ix = 0.0034 # kg*m^2
-        Iy = 0.0034 # kg*m^2
-        Iz  = 0.006 # kg*m^2
-        m  = 0.698 # kg
-        g  = 9.81 # m/s^2
+        # Original code constants in comments were based on Asctec Hummingbird drone
+
+        # Hector drone constants from:
+        # https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor/blob/kinetic-devel/hector_quadrotor_model/matlab/parameter_QK_propulsion.m
+        m  = 1.477 #0.698 # kg 
+        g  = 9.81  # m/s^2
+        l =  0.275   #0.171 # m (motor to core distance)
+        m_M = 0.072; 
+        m_R = 0.044; 
+        m_C = m-4*m_M-2*m_R;
+
+        Ix = 2*m_M*l**2 + 1/12*m_C*(2*.12**2) + 1/12*m_R*(2*l)**2   #0.0034 # kg*m^2
+        Iy = Ix                                                     #0.0034 # kg*m^2
+        Iz = 4*m_M*l**2 + 1/12*m_C*(2*.12**2) + 2*1/12*m_R*(2*l)**2 #0.006 # kg*m^2
+        
 
         #inertia of motor's rotating component
-        Jtp= 1.302*10**(-6) # N*m*s^2= kg*m^2     
+        Jtp=  2.5730480633*10**(-5)  #1.302*10**(-6) # N*m*s^2=kg*m^2     
 
-        Ts= 0.1 # s
+        Ts= 0.1 # secs
 
         # Matrix weights for the cost function (They must be diagonal)
         Q= np.matrix('10 0 0;0 10 0;0 0 10') # weights for outputs (all samples, except the last one)
         S= np.matrix('20 0 0;0 20 0;0 0 20') # weights for the final horizon period outputs
         R= np.matrix('10 0 0;0 10 0;0 0 10') # weights for inputs
 
-        ct = 7.6184*10**(-8)*(60/(2*np.pi))**2 # N*s^2
-        cq = 2.6839*10**(-9)*(60/(2*np.pi))**2 # N*m*s^2
-        l = 0.171 # m , motor to core distance
+        # ct value from https://www.apcprop.com/files/PER3_10x45MR.dat datasheet and cq calculations from spreadsheet:
+        # Assumption is for 10000 RPM motor and a drone moving at 1 m/s or about 2.2 mph:
+        
+        #Thrust coefficient
+        ct = 0.1139 #Asctec drone value: 7.6184*10**(-8)*(60/(2*np.pi))**2 # N*s^2
 
+        #Drag coefficient of propeller.
+        #The cq variable was used as the drag coeff.in the Udemy course
+
+        cq = 0.063  #Asctec drone value: 2.6839*10**(-9)*(60/(2*np.pi))**2 # N*m*s^2
+        
         controlled_states=3 # Number of attitude outputs: Phi, Theta, Psi
-        hz = 4 # horizon period
+        hz = 4 # horizon period 
 
         innerDyn_length=4 # Number of inner control loop iterations
 
@@ -39,50 +54,49 @@ class SupportFilesDrone:
         py=np.array([-1,-2])
         pz=np.array([-1,-2])
 
-        # # Complex poles
+        ## Complex poles
         # px=np.array([-0.1+0.3j,-0.1-0.3j])
         # py=np.array([-0.1+0.3j,-0.1-0.3j])
         # pz=np.array([-1+1.3j,-1-1.3j])
 
         # Initial parameters for trajectory functions:
 
-        r=2    #radius of the spiral  
-        f=0.025 #rotations in spiral
+        r= 55 #radius of the spiral  
+        f= 0.025 #rotations in spiral
      
         height_i=5
         height_f=25
-        
-        # Default: 0. Make positive x and y longer for visual purposes (1-Yes, 0-No). It does  not affect the dynamics of the UAV.
-        pos_x_y=0  
-
-        sub_loop=5 # for animation purposes
-        sim_version=1 # Can only be 1 or 2 - will show you different graphs in the animation
-
+         
+        sub_loop=5  
+ 
         # Drag force switch:
-        drag_switch=0 # Must be either 0 or 1 (0 - drag force OFF, 1 - drag force ON)
+        drag_switch=1   # Must be either 0 or 1 (0 - drag force OFF, 1 - drag force ON)
         
-
-        # Drag force coefficients:
-        C_D_u= 1.5
-        C_D_v= 1.5
-        C_D_w= 2.0
-             
-        # Drag force cross-section area [m^2]
-        A_u= 2*l*0.01+0.05**2
-        A_v= A_u     # drone is symmetric
-        A_w= 2*2*l*0.01+0.05**2
-
         # Air density
         rho= 1.225 # [kg/m^3]
-        
+
+        #rotor radius
+        R_p = 0.1269  # m
+             
+        # Drag force cross-section area [m^2]
+        A_u=  2*0.023*0.2+.11*0.12            #2*l*0.01+0.05**2
+        A_v= A_u                                 # drone is symmetric
+        A_w= 4*0.023*0.2+.12**2+0*R_p**2*np.pi*4       #2*2*l*0.01+0.05**2
+
+        c_w= 0.9228*2/3
+
+        # Drag force coefficients:
+        C_D_u= 1/2*A_u*rho*c_w #1.5
+        C_D_v= 1/2*A_v*rho*c_w  #1.5
+        C_D_w= 1/2*A_w*rho*c_w #2.0
+    
         # Choose your trajectory: from 1-9
-        trajectory=1
+        trajectory = 1 #spiral
 
-        no_plots=0    #0-you will see the plots; 1-you will skip the plots (only animation)
-
-        self.constants=[Ix, Iy, Iz, m, g, Jtp, Ts, Q, S, R, ct, cq, l, controlled_states, hz, innerDyn_length, px, py, pz, r, f, height_i, height_f,pos_x_y, sub_loop, sim_version, drag_switch, C_D_u, C_D_v, C_D_w, A_u, A_v, A_w, rho, trajectory, no_plots]
+        self.constants=[Ix, Iy, Iz, m, g, Jtp, Ts, Q, S, R, ct, cq, l, controlled_states, hz, innerDyn_length, px, py, pz, r, f, height_i, height_f, sub_loop, drag_switch, C_D_u, C_D_v, C_D_w, A_u, A_v, A_w, rho, trajectory]
 
         return None
+
 
     def trajectory_generator(self,t):
         '''This method creates the trajectory for a drone to follow'''
@@ -93,7 +107,7 @@ class SupportFilesDrone:
         f=self.constants[20]
         height_i=self.constants[21]
         height_f=self.constants[22]
-        trajectory=self.constants[34]
+        trajectory=self.constants[32]
         d_height=height_f-height_i
 
         # Define the x, y, z dimensions for the drone trajectories
@@ -269,9 +283,9 @@ class SupportFilesDrone:
 
         return x, x_dot, x_dot_dot, y, y_dot, y_dot_dot, z, z_dot, z_dot_dot, psiInt
 
-
+    '''This function is a position controller - it computes the necessary U1 for the open loop system, and phi & theta angles for the MPC controller'''
     def pos_controller(self,X_ref,X_dot_ref,X_dot_dot_ref,Y_ref,Y_dot_ref,Y_dot_dot_ref,Z_ref,Z_dot_ref,Z_dot_dot_ref,Psi_ref,states):
-        '''This function is a position controller - it computes the necessary U1 for the open loop system, and phi & theta angles for the MPC controller'''
+  
 
         # Load the constants
         m=self.constants[3]
@@ -279,7 +293,6 @@ class SupportFilesDrone:
         px=self.constants[16]
         py=self.constants[17]
         pz=self.constants[18]
-
 
         # Assign the states
         # States: [u,v,w,p,q,r,x,y,z,phi,theta,psi]
@@ -358,6 +371,7 @@ class SupportFilesDrone:
         U1=(vz+g)*m/(np.cos(Phi_ref)*np.cos(Theta_ref))
 
         return Phi_ref, Theta_ref, U1
+
     def LPV_cont_discrete(self,states,omega_total):
         '''This is an LPV model concerning the three rotational axis.'''
 
@@ -542,19 +556,19 @@ class SupportFilesDrone:
         phi = current_states[9]
         theta = current_states[10]
         psi = current_states[11]
-        sub_loop=self.constants[24]  #Chop Ts into 5 pieces
+        sub_loop=self.constants[23]  #Chop Ts into 5 pieces
         states_ani=np.zeros((sub_loop,6))
         U_ani=np.zeros((sub_loop,4))
 
         # Drag force:
-        drag_switch=self.constants[26]
-        C_D_u=self.constants[27]
-        C_D_v=self.constants[28]
-        C_D_w=self.constants[29]
-        A_u=self.constants[30]
-        A_v=self.constants[31]
-        A_w=self.constants[32]
-        rho=self.constants[33]
+        drag_switch=self.constants[24]
+        C_D_u=self.constants[25]
+        C_D_v=self.constants[26]
+        C_D_w=self.constants[27]
+        A_u=self.constants[28]
+        A_v=self.constants[29]
+        A_w=self.constants[30]
+        rho=self.constants[31]
 
         # Runge-Kutta method
         u_or=u

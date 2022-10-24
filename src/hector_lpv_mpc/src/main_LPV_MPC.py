@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
 
-# Modified controller code based on Python code from author Mark Misin. 
+# Modified controller code based on Python code authored by Mark Misin. 
 # The portion of the code for the Model Predictive Controller(MPC) based on Linear Parameter Varying (LPV) model was made freely available for distribution from the course Applied Control Systems 3: UAV
 # drone (3D # Dynamics & control) by Mark Misin: https://www.udemy.com/course/applied-control-systems-for-engineers-2-uav-drone-control/
 
 
-
 import platform
-print("Python " + platform.python_version())
+print("Controller started. Python " + platform.python_version())
 import support_files_drone as sfd #
 
 # import numpy libraries
@@ -20,8 +19,7 @@ import rospy
 from std_msgs.msg import String
 import geometry_msgs.msg
 
-
-# Create an object for the support functions.
+# Create an object for the support functions in support_files_drone.py
 support=sfd.SupportFilesDrone()
 constants=support.constants
 
@@ -29,26 +27,8 @@ constants=support.constants
 Ts=constants[6]
 controlled_states=constants[13] # number of outputs
 innerDyn_length=constants[15] # number of inner control loop iterations
-pos_x_y= constants[23]
 
-if pos_x_y==1:
-    extension=2.5
-elif pos_x_y==0:
-    extension=0
-else:
-    print("Please make pos_x_y variable either 1 or 0 in the support file initial funtcion (where all the initial constants are)")
-    exit()
-
-sub_loop=constants[24]
-
-sim_version=constants[25]
-if sim_version==1:
-    sim_version=1
-elif sim_version==2:
-    sim_version=2
-else:
-    print("Please assign only 1 or 2 to the variable 'sim_version' in the input function")
-    exit()
+sub_loop=constants[23]
 
 # Generate the reference signals
 t=np.arange(0,100+Ts*innerDyn_length,Ts*innerDyn_length) # time from 0 to 100 seconds, sample time (Ts=0.4 second)
@@ -105,7 +85,7 @@ UTotal_ani= UTotal
 
 for i_global in range(0,plotl-1):
     # Implement the position controller (state feedback linearization)
-    phi_ref, theta_ref, U1=support.pos_controller(X_ref[i_global+1],X_dot_ref[i_global+1],X_dot_dot_ref[i_global+1],Y_ref[i_global+1],Y_dot_ref[i_global+1],Y_dot_dot_ref[i_global+1],Z_ref[i_global+1],Z_dot_ref[i_global+1],Z_dot_dot_ref[i_global+1],psi_ref[i_global+1],states)
+    phi_ref, theta_ref,U1= support.pos_controller(X_ref[i_global+1],X_dot_ref[i_global+1],X_dot_dot_ref[i_global+1],Y_ref[i_global+1],Y_dot_ref[i_global+1],Y_dot_dot_ref[i_global+1],Z_ref[i_global+1],Z_dot_ref[i_global+1],Z_dot_dot_ref[i_global+1],psi_ref[i_global+1],states)
     Phi_ref=np.transpose([phi_ref*np.ones(innerDyn_length+1)])
     Theta_ref=np.transpose([theta_ref*np.ones(innerDyn_length+1)])
 
@@ -131,6 +111,7 @@ for i_global in range(0,plotl-1):
     # Initiate the controller - simulation loops
     hz=support.constants[14] # horizon period
     k=0 # for reading reference signals
+
     # statesTotal2=np.concatenate((statesTotal2,[states]),axis=0)
     for i in range(0,innerDyn_length):
         # Generate the discrete state space matrices
@@ -233,24 +214,29 @@ for i_global in range(0,plotl-1):
         #print("UTotal_ani= ",UTotal_ani)
         #print("statesTotal_ani:",statesTotal_ani)
 
-################################ Drone velocities inputs ###############################
+################################ Drone input signals ##########################################################################
 
 #statesTotal_x
 statesTotal_ani[:,0]
 #statesTotal_y 
 statesTotal_ani[:,1]
 #statesTotal_z 
-statesTotal_ani[:,2]
+#statesTotal_ani[:,2]
 
 #statesTotal_phi 
 statesTotal_ani[:,3]
 #statesTotal_theta 
 statesTotal_ani[:,4]
 #statesTotal_psi 
-statesTotal_ani[:,5]				
+statesTotal_ani[:,5]	
+
+UTotal_ani[:,0]			
+#UTotal_ani[:,1]
+#UTotal_ani[:,2]
+#UTotal_ani[:,3]			
 
 
-################################### END OF MPV-LPV CONTROLLER CODE CODE  #######################################################################################################
+################################### END OF LPV_MPC CONTROLLER CODE #######################################################################################################
  
 # Start of code for Hector quadcopter:
   
@@ -287,12 +273,12 @@ def open_loop(statesTotal):
         if n<20:
 		quad_vel.publish(takeoff_command())
 		n=n+1
-        else:
+        else:                                  
 		cmd.linear.x = statesTotal_ani[i,0]
-		cmd.linear.y = statesTotal_ani[i,1]   
-		cmd.linear.z = statesTotal_ani[i,2] 
+		cmd.linear.y = statesTotal_ani[i,1]
+		cmd.linear.z = UTotal_ani[i,0]    #Throttle
              	                 
-		cmd.angular.x = statesTotal_ani[i,3]
+		cmd.angular.x = statesTotal_ani[i,3] 
 		cmd.angular.y = statesTotal_ani[i,4] 
 		cmd.angular.z = statesTotal_ani[i,5]
 
