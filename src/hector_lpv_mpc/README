@@ -1,2 +1,2 @@
 Python code for hector quadcopter with LPV MPC controller
-Note: XBox controller was disabled in this project.
+Note: XBox controller was disabled in this project and drag variable set to 1.
