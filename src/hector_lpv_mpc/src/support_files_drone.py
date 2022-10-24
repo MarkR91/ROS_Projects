@@ -8,9 +8,9 @@ class SupportFilesDrone:
         ''' Load the constants that do not change'''
      
         # Original code constants in comments were based on Asctec Hummingbird drone
-
-        # Hector drone constants from:
+        # Hector drone constants based on:
         # https://github.com/tu-darmstadt-ros-pkg/hector_quadrotor/blob/kinetic-devel/hector_quadrotor_model/matlab/parameter_QK_propulsion.m
+
         m  = 1.477 #0.698 # kg 
         g  = 9.81  # m/s^2
         l =  0.275   #0.171 # m (motor to core distance)
@@ -36,13 +36,13 @@ class SupportFilesDrone:
         # ct value from https://www.apcprop.com/files/PER3_10x45MR.dat datasheet and cq calculations from spreadsheet:
         # Assumption is for 10000 RPM motor and a drone moving at 1 m/s or about 2.2 mph:
         
-        #Thrust coefficient
-        ct = 0.1139 #Asctec drone value: 7.6184*10**(-8)*(60/(2*np.pi))**2 # N*s^2
+        #Thrust coefficient for 10x4.5 Multi Rotor
+        ct = 0.1139 # 7.6184*10**(-8)*(60/(2*np.pi))**2 # N*s^2
 
-        #Drag coefficient of propeller.
+        #Drag coefficient for 10x4.5 Multi Rotor
         #The cq variable was used as the drag coeff.in the Udemy course
 
-        cq = 0.063  #Asctec drone value: 2.6839*10**(-9)*(60/(2*np.pi))**2 # N*m*s^2
+        cq = 0.063  # 2.6839*10**(-9)*(60/(2*np.pi))**2 # N*m*s^2
         
         controlled_states=3 # Number of attitude outputs: Phi, Theta, Psi
         hz = 4 # horizon period 

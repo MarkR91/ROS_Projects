@@ -5,10 +5,9 @@
 # The portion of the code for the Model Predictive Controller(MPC) based on Linear Parameter Varying (LPV) model was made freely available for distribution from the course Applied Control Systems 3: UAV
 # drone (3D # Dynamics & control) by Mark Misin: https://www.udemy.com/course/applied-control-systems-for-engineers-2-uav-drone-control/
 
-
 import platform
 print("Controller started. Python " + platform.python_version())
-import support_files_drone as sfd #
+import support_files_drone as sfd # Contains constants for Hector drone
 
 # import numpy libraries
 import math
@@ -31,9 +30,11 @@ innerDyn_length=constants[15] # number of inner control loop iterations
 sub_loop=constants[23]
 
 # Generate the reference signals
+
 t=np.arange(0,100+Ts*innerDyn_length,Ts*innerDyn_length) # time from 0 to 100 seconds, sample time (Ts=0.4 second)
 t_angles=np.arange(0,t[-1]+Ts,Ts)
 t_ani=np.arange(0,t[-1]+Ts/sub_loop,Ts/sub_loop)
+
 X_ref,X_dot_ref,X_dot_dot_ref,Y_ref,Y_dot_ref,Y_dot_dot_ref,Z_ref,Z_dot_ref,Z_dot_dot_ref,psi_ref=support.trajectory_generator(t)
 plotl=len(t) # Number of outer control loop iterations
 
@@ -276,7 +277,7 @@ def open_loop(statesTotal):
         else:                                  
 		cmd.linear.x = statesTotal_ani[i,0]
 		cmd.linear.y = statesTotal_ani[i,1]
-		cmd.linear.z = UTotal_ani[i,0]    #Throttle
+		cmd.linear.z = UTotal_ani[i,0]   #Throttle/thrust
              	                 
 		cmd.angular.x = statesTotal_ani[i,3] 
 		cmd.angular.y = statesTotal_ani[i,4] 
